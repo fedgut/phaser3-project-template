@@ -27,6 +27,13 @@ export default class GameScene extends Phaser.Scene {
   collectStar(player, star) {
     star.disableBody(true, true);
     this.ScoreLabel.add(10);
+
+    if (this.stars.countActive(true) === 0) {
+      this.starts.children.iterate((child) => {
+        child.enableBody(true, child.x, 0, true, true);
+      });
+    }
+    this.bombSpawner.spawn(player.x);
   }
 
   createPlatforms() {
@@ -116,14 +123,17 @@ export default class GameScene extends Phaser.Scene {
 
     const platforms = this.createPlatforms();
     this.player = this.createPlayer();
-    const stars = this.createStars();
+    this.stars = this.createStars();
 
     this.ScoreLabel = this.createScoreLabel(16, 15, 0);
+
     this.bombSpawner = new BombSpawner(this, BOMB_KEY);
+    const bombsGroup = this.bombSpawner.group;
 
     this.physics.add.collider(this.player, platforms);
-    this.physics.add.collider(stars, platforms);
-    this.physics.add.overlap(this.player, stars, this.collectStar, null, this);
+    this.physics.add.collider(this.stars, platforms);
+    this.physics.add.collider(bombsGroup, platforms);
+    this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
   }
