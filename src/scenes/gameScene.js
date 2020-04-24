@@ -124,10 +124,10 @@ export default class GameScene extends Phaser.Scene {
 
   update() {
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
+      this.player.setVelocityX(-260);
       this.player.anims.play('left', true);
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(160);
+      this.player.setVelocityX(260);
 
       this.player.anims.play('right', true);
     } else {
@@ -136,7 +136,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-330);
+      this.player.setVelocityY(-380);
     }
   }
 }
