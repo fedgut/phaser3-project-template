@@ -21,6 +21,18 @@ export default class GameScene extends Phaser.Scene {
     this.stars = undefined;
     this.ScoreLabel = undefined;
     this.bombSpawner = undefined;
+
+    this.gameOver = false;
+  }
+
+  hitBomb(player, bomb) {
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+
+    player.anims.play('turn');
+
+    this.gameOver = true;
   }
 
   // eslint-disable-next-line no-shadow
@@ -29,7 +41,7 @@ export default class GameScene extends Phaser.Scene {
     this.ScoreLabel.add(10);
 
     if (this.stars.countActive(true) === 0) {
-      this.starts.children.iterate((child) => {
+      this.stars.children.iterate((child) => {
         child.enableBody(true, child.x, 0, true, true);
       });
     }
@@ -133,12 +145,16 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(this.stars, platforms);
     this.physics.add.collider(bombsGroup, platforms);
+    this.physics.add.collider(this.player, bombsGroup, this.hitBomb, null, this);
     this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
   }
 
   update() {
+    if (this.gameOver) {
+      return;
+    }
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-260);
       this.player.anims.play('left', true);
