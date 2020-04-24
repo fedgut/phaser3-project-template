@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import ScoreLabel from '../ui/scoreLabel';
 import star from '../assets/star.png';
 import dude from '../assets/dude.png';
 import sky from '../assets/sky.png';
@@ -14,10 +15,13 @@ export default class GameScene extends Phaser.Scene {
     super('game-scene');
     this.player = undefined;
     this.cursors = undefined;
+    this.ScoreLabel = undefined;
   }
 
+  // eslint-disable-next-line no-shadow
   collectStar(player, star) {
     star.disableBody(true, true);
+    this.ScoreLabel.add(10);
   }
 
   createPlatforms() {
@@ -80,6 +84,15 @@ export default class GameScene extends Phaser.Scene {
     return this.player;
   }
 
+  createScoreLabel(x, y, score) {
+    const style = { fontSize: '32px', fill: '#000' };
+    const label = new ScoreLabel(this, x, y, score, style);
+
+    this.add.existing(label);
+
+    return label;
+  }
+
   preload() {
     this.load.image('sky', sky);
     this.load.image('star', star);
@@ -99,6 +112,8 @@ export default class GameScene extends Phaser.Scene {
     const platforms = this.createPlatforms();
     this.player = this.createPlayer();
     const stars = this.createStars();
+
+    this.ScoreLabel = this.createScoreLabel(16, 15, 0);
 
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(stars, platforms);
