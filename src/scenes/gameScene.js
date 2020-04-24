@@ -5,17 +5,22 @@ import dude from '../assets/dude.png';
 import sky from '../assets/sky.png';
 import bomb from '../assets/bomb.png';
 import platform from '../assets/platform.png';
+import BombSpawner from './bombSpawner';
 
 const DUDE_KEY = 'dude';
 const GROUND_KEY = 'ground';
 const STAR_KEY = 'star';
+const BOMB_KEY = 'bomb';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super('game-scene');
+
     this.player = undefined;
     this.cursors = undefined;
+    this.stars = undefined;
     this.ScoreLabel = undefined;
+    this.bombSpawner = undefined;
   }
 
   // eslint-disable-next-line no-shadow
@@ -114,6 +119,7 @@ export default class GameScene extends Phaser.Scene {
     const stars = this.createStars();
 
     this.ScoreLabel = this.createScoreLabel(16, 15, 0);
+    this.bombSpawner = new BombSpawner(this, BOMB_KEY);
 
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(stars, platforms);
