@@ -6,11 +6,13 @@ import sky from '../assets/sky.png';
 import bomb from '../assets/bomb.png';
 import platform from '../assets/platform.png';
 import BombSpawner from './bombSpawner';
+import coin from '../assets/coin.png';
 
 const DUDE_KEY = 'dude';
 const GROUND_KEY = 'ground';
 const STAR_KEY = 'star';
 const BOMB_KEY = 'bomb';
+const COIN_KEY = 'coin';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +25,21 @@ export default class GameScene extends Phaser.Scene {
     this.bombSpawner = undefined;
 
     this.gameOver = false;
+
+    this.gameOptions = {
+      platformSpeedRange: [300, 400],
+      spawnRange: [80, 400],
+      platformSizeRange: [90, 300],
+      platformHeightRange: [-10, 10],
+      platformHeighScale: 10,
+      platformVerticalLimit: [0.4, 0.8],
+      playerGravity: 900,
+      jumpForce: 400,
+      playerStartPosition: 200,
+      jumps: 2,
+      coinPercent: 25,
+      bombPercent: 25,
+    };
   }
 
   hitBomb(player, bomb) {
@@ -72,6 +89,31 @@ export default class GameScene extends Phaser.Scene {
       child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
     return stars;
+  }
+
+  createCoins() {
+    this.coins = this.add.group({
+      removeCallback: (coin) => {
+        coin.scene.coinPool.add(coin);
+      },
+    });
+
+    this.coinPool = this.add.group({
+      removeCallback: (coin) => {
+        coin.scene.coins.add(coin);
+      },
+    });
+
+    this.anims.create({
+      key: 'rotate',
+      frames: this.anims.generateFrameNumbers(COIN_KEY, {
+        start: 0,
+        end: 5,
+      }),
+      frameRate: 15,
+      yoyo: true,
+      repeat: -1,
+    });
   }
 
   createPlayer() {
@@ -127,6 +169,11 @@ export default class GameScene extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 48,
     });
+
+    this.load.spritesheet('coin', coin, {
+      frameWidth: 20,
+      frameHeight: 20,
+    });
   }
 
   create() {
@@ -145,8 +192,20 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, platforms);
     this.physics.add.collider(this.stars, platforms);
     this.physics.add.collider(bombsGroup, platforms);
-    this.physics.add.collider(this.player, bombsGroup, this.hitBomb, null, this);
-    this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
+    this.physics.add.collider(
+      this.player,
+      bombsGroup,
+      this.hitBomb,
+      null,
+      this,
+    );
+    this.physics.add.overlap(
+      this.player,
+      this.stars,
+      this.collectStar,
+      null,
+      this,
+    );
 
     this.cursors = this.input.keyboard.createCursorKeys();
   }
@@ -165,6 +224,10 @@ export default class GameScene extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0);
       this.player.anims.play('turn');
+    }
+
+    if (this.cursors.down.isDown) {
+      this.player.setVelocityY(700);
     }
 
     if (this.cursors.up.isDown && this.player.body.touching.down) {
